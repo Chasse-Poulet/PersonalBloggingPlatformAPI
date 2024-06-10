@@ -1,0 +1,193 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Personal Blogging Platform'
+  description: Create, read, update and delete articles
+
+servers:
+  - description: Localhost
+    url: http://localhost:3000
+
+paths:
+  /articles:
+    get:
+      tags:
+        - article
+      summary: Find articles by filter
+      description: Returns a list of articles
+      operationId: getArticles
+      parameters:
+        - name: filter
+          in: query
+          description: filter that contains all properties to filter
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+    post:
+      tags:
+        - article
+      summary: Creates a new article
+      operationId: createArticle
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+        "400":
+          description: unable to create article
+      requestBody:
+        $ref: "#/components/requestBodies/Article"
+  "/articles/{articleId}":
+    parameters:
+      - name: articleId
+        description: The unique identifier of the article
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ArticleId'
+    get:
+      tags:
+        - article
+      summary: Find article by ID
+      description: Returns a single article
+      operationId: getArticleById
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Article"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Article not found
+    put:
+      tags:
+        - article
+      summary: Update an existing article
+      operationId: updateArticle
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Article not found
+      requestBody:
+        $ref: "#/components/requestBodies/Article"
+    delete:
+      tags:
+        - article
+      summary: Deletes an article
+      operationId: deleteArticle
+      parameters:
+        - name: articleId
+          in: path
+          description: Article id to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Article not found
+
+components:
+  schemas:
+    Article:
+      type: object
+      required:
+        - title
+        - body
+        - author
+      properties:
+        author:
+          type: string
+          example: Batman
+        title:
+          type: string
+          example: How to use the Batarang
+        body:
+          type: string
+          example: oui
+        tags:
+          type: array
+          xml:
+            name: tag
+            wrapped: true
+          items:
+            type: string
+        comments:
+          type: array
+          xml:
+            name: comment
+            wrapped: true
+          items:
+            type: object
+            properties:
+              body:
+                type: string
+                example: great article!
+              date:
+                type: string
+                format: date
+        date:
+          type: string
+          format: date
+    ArticleId:
+      description: The unique identifier of an article
+      type: string
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          description: A human readable error message
+          type: string
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+  requestBodies:
+    Article:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Article"
+        application/xml:
+          schema:
+            $ref: "#/components/schemas/Article"
+      description: Article object that needs to be published
+      required: true
+security:
+  - ApiKey: []
